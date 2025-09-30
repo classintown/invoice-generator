@@ -6,7 +6,6 @@ import { InvoiceDetails } from "@/components/InvoiceDetails";
 import { InvoiceTable } from "@/components/InvoiceTable";
 import { InvoiceFooter } from "@/components/InvoiceFooter";
 import { Printer, Download, Edit } from "lucide-react";
-import signatureImage from "@/assets/signature.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -38,6 +37,7 @@ const Index = () => {
     },
     amountInWords: "Rupees Ten thousand only",
     signature: "Rajesh Kumar Sharma",
+    signatureImage: null,
   });
 
   // Function to convert number to Indian words
@@ -154,7 +154,7 @@ const Index = () => {
             bankDetails={invoiceData.bankDetails}
             amountInWords={invoiceData.amountInWords}
             signature={invoiceData.signature}
-            signatureImage={signatureImage}
+            signatureImage={invoiceData.signatureImage}
           />
         </div>
       </div>

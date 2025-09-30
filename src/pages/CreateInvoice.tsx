@@ -40,6 +40,8 @@ const CreateInvoice = () => {
   const [branch, setBranch] = useState("");
   
   const [signature, setSignature] = useState("");
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -64,6 +66,7 @@ const CreateInvoice = () => {
       setBankName(data.bankDetails?.bankName || "");
       setBranch(data.bankDetails?.branch || "");
       setSignature(data.signature || "");
+      setSignaturePreview(data.signatureImage || null);
     } else {
       // Set default values for first time users
       const today = new Date();
@@ -96,6 +99,45 @@ const CreateInvoice = () => {
     setItems(newItems);
   };
 
+  const handleSignatureUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please upload an image smaller than 2MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSignatureFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSignaturePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeSignature = () => {
+    setSignatureFile(null);
+    setSignaturePreview(null);
+  };
+
   const handleSave = () => {
     // Validate required fields
     if (!fromName || !billToName || items.length === 0) {
@@ -122,6 +164,7 @@ const CreateInvoice = () => {
       bankDetails: { accountNumber, ifscCode, bankName, branch },
       amountInWords: `Rupees ${numberToIndianWords(total)}`,
       signature,
+      signatureImage: signaturePreview,
     };
 
     localStorage.setItem("invoiceData", JSON.stringify(invoiceData));
@@ -406,14 +449,51 @@ const CreateInvoice = () => {
             </div>
 
             {/* Signature */}
-            <div>
-              <Label htmlFor="signature">Signature Name</Label>
-              <Input
-                id="signature"
-                value={signature}
-                onChange={(e) => setSignature(e.target.value)}
-                placeholder="Your name for signature"
-              />
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="signature">Signature Name</Label>
+                <Input
+                  id="signature"
+                  value={signature}
+                  onChange={(e) => setSignature(e.target.value)}
+                  placeholder="Your name for signature"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="signatureUpload">Upload Signature Image</Label>
+                <div className="space-y-3">
+                  <Input
+                    id="signatureUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSignatureUpload}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                  />
+                  
+                  {signaturePreview && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Signature Preview:</p>
+                      <div className="relative inline-block">
+                        <img 
+                          src={signaturePreview} 
+                          alt="Signature Preview" 
+                          className="h-16 w-auto border border-border rounded"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={removeSignature}
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Save Button */}

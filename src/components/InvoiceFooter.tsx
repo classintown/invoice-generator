@@ -35,9 +35,13 @@ export const InvoiceFooter = ({ bankDetails, amountInWords, signature, signature
 
       <div className="flex justify-end pt-6 print:pt-4">
         <div className="text-right">
-          {signatureImage && (
+          {signatureImage ? (
             <div className="mb-2 print:mb-1 flex justify-end">
               <img src={signatureImage} alt="Signature" className="h-16 print:h-12 w-auto" />
+            </div>
+          ) : (
+            <div className="mb-2 print:mb-1 h-16 print:h-12 w-48 print:w-40 border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
+              <p className="text-xs text-muted-foreground">No signature uploaded</p>
             </div>
           )}
           <p className="text-sm print:text-sm font-semibold text-foreground mb-2 print:mb-1">{signature}</p>
